@@ -65,7 +65,7 @@ class Stereogram {
     //Get a pattern that is a column of size div/stereogram.width
 
     //Transform the ImageData "map" into a stereogram (ImageData)
-    make_stereogram(){
+    get_stereogram(){
         //Get the pattern (some random gray-scale pixels)
         var pattern = this.randomData(Math.round(this.map.width / this.div), this.map.height)
         //Make the stereogram ImageData
@@ -113,15 +113,9 @@ class Stereogram {
         return stereogram
     }
 
-    //Get the ImageData value of the stereogram
-    get_image_data() {
-        var stereogram = this.make_stereogram();
-        return stereogram
-    }
-
     //Get a canvas containing the stereogram
     get_canvas(){
-        var stereogram_data = this.get_image_data()
+        var stereogram_data = this.get_stereogram()
         var canvas = this.blankCanvas(stereogram_data.width, stereogram_data.height)
         this.displayData(canvas, stereogram_data)
         return canvas;
