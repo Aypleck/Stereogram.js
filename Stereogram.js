@@ -7,18 +7,61 @@ This library takes a map which is an ImageData object and either a autostereogra
 Note that the stereogram will always be larger than the original heightmap, because of how the illusion works.
 */
 
+//Random pixel patterns 
+//Width and height are the dimension of the pattern
+//Color : the color tone of the pixels : "green", "red", "blue", or "white"
+class RandomPattern {
+    constructor(width, height, color) {
+        this.width = Math.round(width);
+        this.height = Math.round(height);
+        //Check if color is valid
+        var colors = ["red", "green", "blue", "white"];
+        if(colors.indexOf(color) == -1){
+            throw "Invalid color "+color;
+        }
+
+        //Create blank canvas
+        var canvas = document.createElement("canvas");
+        canvas.height = this.height;
+        canvas.width = this.width;
+        
+        //Get blank data
+        var data = canvas.getContext('2d').getImageData(0, 0, width, height)
+
+        //Set pixels to random colors
+        for(var y = 0; y < height; y++){
+            for(var x = 0; x <= width; x++){
+                var color = Math.round(Math.random() * 255)
+                var index = 4 * (y * width + x)
+                //select right color
+                data.data[index    ] = (this.color == "red") ? 255 : color;
+                data.data[index + 1] = (this.color == "green") ? 255 : color;
+                data.data[index + 2] = (this.color == "blue") ? 255 : color;
+                //always set alpha to 255
+                data.data[index + 3] = 255;
+            }
+        }
+        this.data = data;
+    }
+}
+
 class Stereogram {
-    //"map_dir" is the directory of the heightmap
+    //"map" is the the heightmap (an ImageData)
     //"max_height" is the maximum shift in pixels
     //"div" is the number of sections the stereogram will be splitter in
-    constructor(map, max_height, div, pattern_dir=undefined){
+    constructor(map, max_height, div, pattern=undefined){
         this.map = map;
         this.max_height = max_height;
         this.div = div;
-        this.pattern_dir = pattern_dir
+        //TODO : Implement custom pattterns by making a StereogramPatern class
+        if(pattern == undefined){
+            this.pattern = new RandomPattern(Math.round(map.width / div), map.height, "white")
+        }else {
+            this.pattern = pattern; 
+        }
     }
 
-    //Generate a blank canvas with size width x height
+    // Generate a blank canvas with size width x height
     blankCanvas(width, height){
         var canvas = document.createElement("canvas");
         canvas.height = height;
@@ -42,32 +85,9 @@ class Stereogram {
         ctx.drawImage(canvas, 0, 0, data.width, data.height, 0, 0, canvas.width, canvas.height)
     }
 
-
-    //Generate a random noise ImageData with size width x height
-    randomData(width, height){
-        var data = this.blankData(width, height)
-        for(var y = 0; y < height; y++){
-            for(var x = 0; x <= width; x++){
-                var color = Math.round(Math.random() * 255)
-                // var color = Math.round(x / width * 255) 
-                // var color = (x < 1) ? 0 : 255;
-                // var color = 0;
-                var index = 4 * (y * width + x)
-                data.data[index] = color;
-                data.data[index + 1] = color;
-                data.data[index + 2] = color;
-                data.data[index + 3] = 255;
-            }
-        }
-        return data
-    }
-
-    //Get a pattern that is a column of size div/stereogram.width
-
     //Transform the ImageData "map" into a stereogram (ImageData)
     get_stereogram(){
-        //Get the pattern (some random gray-scale pixels)
-        var pattern = this.randomData(Math.round(this.map.width / this.div), this.map.height)
+        var pattern = this.pattern.data;
         //Make the stereogram ImageData
         var stereogram = this.blankData(this.map.width + pattern.width-1, this.map.height);
         //For every pixels of the stereogram
