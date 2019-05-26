@@ -53,7 +53,6 @@ class Stereogram {
         this.map = map;
         this.max_height = max_height;
         this.div = div;
-        //TODO : Implement custom pattterns by making a StereogramPatern class
         if(pattern == undefined){
             this.pattern = new RandomPattern(Math.round(map.width / div), map.height, "white")
         }else {
